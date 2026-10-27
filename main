@@ -1,0 +1,180 @@
+
+local Players = game:GetService("Players")
+local SoundService = game:GetService("SoundService")
+local UIS = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "NanahhbCatSound"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local sound = Instance.new("Sound")
+sound.Name = "NanahhbMusic"
+sound.Looped = true
+sound.Volume = 0.5
+sound.Parent = SoundService
+
+local cream = Color3.fromRGB(255, 250, 235)
+local pink = Color3.fromRGB(255, 205, 215)
+local blue = Color3.fromRGB(85, 180, 255)
+local brown = Color3.fromRGB(100, 75, 70)
+local green = Color3.fromRGB(205, 240, 190)
+
+local function round(obj, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius)
+    c.Parent = obj
+end
+
+local function stroke(obj, color, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color
+    s.Thickness = thickness
+    s.Parent = obj
+end
+
+local function makeButton(parent, text, color, size, pos)
+    local b = Instance.new("TextButton")
+    b.Text = text
+    b.Size = size
+    b.Position = pos
+    b.BackgroundColor3 = color
+    b.TextColor3 = brown
+    b.TextSize = 15
+    b.Font = Enum.Font.GothamBold
+    b.Parent = parent
+    round(b, 13)
+    return b
+end
+
+local main = Instance.new("Frame")
+main.Size = UDim2.fromOffset(300, 275)
+main.Position = UDim2.new(0.5, -150, 0.5, -137)
+main.BackgroundColor3 = cream
+main.Parent = gui
+round(main, 22)
+stroke(main, pink, 2)
+
+local header = Instance.new("TextLabel")
+header.Size = UDim2.new(1, -12, 0, 58)
+header.Position = UDim2.fromOffset(6, 6)
+header.BackgroundColor3 = pink
+header.Text = "🐱 Nanahhb\nCAT SOUND PLAYER ♡"
+header.TextColor3 = brown
+header.TextSize = 18
+header.Font = Enum.Font.GothamBold
+header.Parent = main
+round(header, 17)
+
+local input = Instance.new("TextBox")
+input.Size = UDim2.new(1, -28, 0, 42)
+input.Position = UDim2.fromOffset(14, 78)
+input.BackgroundColor3 = Color3.new(1, 1, 1)
+input.PlaceholderText = "Nhập Sound ID Roblox..."
+input.Text = ""
+input.TextColor3 = brown
+input.TextSize = 14
+input.ClearTextOnFocus = false
+input.Parent = main
+round(input, 12)
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -20, 0, 28)
+status.Position = UDim2.fromOffset(10, 123)
+status.BackgroundTransparency = 1
+status.Text = "♡ Sẵn sàng phát nhạc"
+status.TextColor3 = brown
+status.TextSize = 12
+status.Parent = main
+
+local on = makeButton(main, "▶ ON", green,
+    UDim2.new(0.5, -20, 0, 43), UDim2.fromOffset(14, 160))
+
+local off = makeButton(main, "■ OFF", pink,
+    UDim2.new(0.5, -20, 0, 43), UDim2.new(0.5, 6, 0, 160))
+
+local footer = Instance.new("TextLabel")
+footer.Size = UDim2.new(1, -10, 0, 25)
+footer.Position = UDim2.fromOffset(5, 220)
+footer.BackgroundTransparency = 1
+footer.Text = "♡ meow meow ♡"
+footer.TextColor3 = brown
+footer.TextSize = 12
+footer.Parent = main
+
+-- Nút mèo vuông ẩn / hiện menu
+local toggle = makeButton(gui, "🐱",
+    Color3.fromRGB(230, 244, 255),
+    UDim2.fromOffset(58, 58),
+    UDim2.new(0, 18, 0.5, -29))
+toggle.TextSize = 29
+round(toggle, 15)
+stroke(toggle, blue, 3)
+
+toggle.Activated:Connect(function()
+    main.Visible = not main.Visible
+end)
+
+-- Lưu ID để bật lại không cần nhập lại
+local lastId = ""
+
+on.Activated:Connect(function()
+    local typedId = input.Text:match("%d+")
+
+    if typedId then
+        lastId = typedId
+    end
+
+    if lastId == "" then
+        status.Text = "⚠ Hãy nhập Sound ID!"
+        return
+    end
+
+    sound:Stop()
+    sound.SoundId = "rbxassetid://" .. lastId
+    sound.Looped = true
+    sound.TimePosition = 0
+    sound:Play()
+
+    status.Text = "▶ Đang phát nhạc lặp lại ♡"
+end)
+
+off.Activated:Connect(function()
+    sound:Stop()
+    status.Text = "■ Đã tắt nhạc ♡"
+end)
+
+-- Kéo menu bằng chuột hoặc cảm ứng
+local dragging = false
+local dragStart
+local startPos
+
+header.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+        or i.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = i.Position
+        startPos = main.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if dragging and (
+        i.UserInputType == Enum.UserInputType.MouseMovement
+        or i.UserInputType == Enum.UserInputType.Touch
+    ) then
+        local delta = i.Position - dragStart
+        main.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+        or i.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
